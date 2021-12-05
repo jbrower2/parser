@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"declaration": true,
+		"module": "CommonJS",
+		"outDir": "dist",
+		"paths": { "*": ["node_modules/*"] },
+		"sourceMap": true,
+		"strict": true,
+		"target": "ES2021"
+	},
+	"include": ["src/**/*.ts"]
+}
