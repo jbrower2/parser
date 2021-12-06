@@ -111,6 +111,20 @@ export type OptResult<O> =
 export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 	constructor(private readonly p: Parser<L, T>) {}
 
+	not(rule: ParserRule<L, any>): ParserRule<L, undefined> {
+		return new ParserRule(
+			`not(${rule.name})`,
+			(
+				input: readonly Token<L>[],
+				start: number,
+				stack: readonly string[]
+			): ParseResult<undefined> | undefined => {
+				const result = rule.parse(input, start, stack);
+				return result ? undefined : { value: undefined, end: start };
+			}
+		);
+	}
+
 	or<O>(...options: readonly ParserRule<L, O>[]): ParserRule<L, O> {
 		return new ParserRule(
 			`or(${options.map((o) => o.name).join(", ")})`,
