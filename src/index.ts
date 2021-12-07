@@ -474,42 +474,34 @@ export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 		);
 	}
 
-	first<O>(
-		rule: ParserRule<L, O>,
-		ignore: ParserRule<L, any>
-	): ParserRule<L, O> {
+	first<O>(rule: ParserRule<L, readonly [O, ...unknown[]]>): ParserRule<L, O> {
 		return new ParserRule(
-			`first(${rule.name}, ${ignore.name})`,
+			`first(${rule.name})`,
 			(
 				input: readonly Token<L>[],
 				start: number,
 				stack: readonly string[]
 			): ParseResult<O> | undefined => {
-				const a = rule.parse(input, start, stack);
-				if (!a) return undefined;
-				const b = ignore.parse(input, a.end, stack);
-				if (!b) return undefined;
-				return { value: a.value, end: b.end };
+				const result = rule.parse(input, start, stack);
+				if (!result) return undefined;
+				const { value, end } = result;
+				return { value: value[0], end };
 			}
 		);
 	}
 
-	last<O>(
-		ignore: ParserRule<L, any>,
-		rule: ParserRule<L, O>
-	): ParserRule<L, O> {
+	last<O>(rule: ParserRule<L, readonly [...unknown[], O]>): ParserRule<L, O> {
 		return new ParserRule(
-			`last(${ignore.name}, ${rule.name})`,
+			`first(${rule.name})`,
 			(
 				input: readonly Token<L>[],
 				start: number,
 				stack: readonly string[]
 			): ParseResult<O> | undefined => {
-				const a = ignore.parse(input, start, stack);
-				if (!a) return undefined;
-				const b = rule.parse(input, a.end, stack);
-				if (!b) return undefined;
-				return b;
+				const result = rule.parse(input, start, stack);
+				if (!result) return undefined;
+				const { value, end } = result;
+				return { value: value[value.length - 1] as O, end };
 			}
 		);
 	}
