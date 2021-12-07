@@ -104,6 +104,29 @@ function repInternal<L extends LexerFields, O>(
 	);
 }
 
+function concatInternal<L extends LexerFields, O>(
+	rules: readonly ParserRule<L, O>[]
+): ParserRule<L, readonly O[]> {
+	return new ParserRule(
+		`concat(${rules.map((r) => r.name).join(", ")})`,
+		(
+			input: readonly Token<L>[],
+			start: number,
+			stack: readonly string[]
+		): ParseResult<any[]> | undefined => {
+			const results = new Array<any>();
+			let end = start;
+			for (const rule of rules) {
+				const result = rule.parse(input, end, stack);
+				if (!result) return undefined;
+				results.push(result.value);
+				end = result.end;
+			}
+			return { value: results, end };
+		}
+	);
+}
+
 export type OptResult<O> =
 	| { success: true; value: O }
 	| { success: false; value: undefined };
@@ -449,40 +472,26 @@ export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 		rule20: ParserRule<L, O20>
 	): ParserRule<L, readonly [O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13, O14, O15, O16, O17, O18, O19, O20]>;
 
-	concat<O>(...rules: readonly ParserRule<L, O>[]): ParserRule<L, readonly O[]>;
-
-	concat<O>(
-		...rules: readonly ParserRule<L, O>[]
-	): ParserRule<L, readonly O[]> {
-		return new ParserRule(
-			`concat(${rules.map((r) => r.name).join(", ")})`,
-			(
-				input: readonly Token<L>[],
-				start: number,
-				stack: readonly string[]
-			): ParseResult<any[]> | undefined => {
-				const results = new Array<any>();
-				let end = start;
-				for (const rule of rules) {
-					const result = rule.parse(input, end, stack);
-					if (!result) return undefined;
-					results.push(result.value);
-					end = result.end;
-				}
-				return { value: results, end };
-			}
-		);
+	concat(
+		...rules: readonly ParserRule<L, any>[]
+	): ParserRule<L, readonly any[]> {
+		return concatInternal(rules);
 	}
 
-	first<O>(rule: ParserRule<L, readonly [O, ...unknown[]]>): ParserRule<L, O> {
+	first<O>(
+		rule: ParserRule<L, O>,
+		rule1: ParserRule<L, any>,
+		...rest: readonly ParserRule<L, any>[]
+	): ParserRule<L, O> {
+		const concat = concatInternal([rule, rule1, ...rest]);
 		return new ParserRule(
-			`first(${rule.name})`,
+			concat.name.replace("concat", "first"),
 			(
 				input: readonly Token<L>[],
 				start: number,
 				stack: readonly string[]
 			): ParseResult<O> | undefined => {
-				const result = rule.parse(input, start, stack);
+				const result = concat.parse(input, start, stack);
 				if (!result) return undefined;
 				const { value, end } = result;
 				return { value: value[0], end };
@@ -490,18 +499,304 @@ export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 		);
 	}
 
-	last<O>(rule: ParserRule<L, readonly [...unknown[], O]>): ParserRule<L, O> {
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, any>,
+		rule16: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, any>,
+		rule16: ParserRule<L, any>,
+		rule17: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, any>,
+		rule16: ParserRule<L, any>,
+		rule17: ParserRule<L, any>,
+		rule18: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, any>,
+		rule16: ParserRule<L, any>,
+		rule17: ParserRule<L, any>,
+		rule18: ParserRule<L, any>,
+		rule19: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	// prettier-ignore
+	last<O>(
+		rule1: ParserRule<L, any>,
+		rule2: ParserRule<L, any>,
+		rule3: ParserRule<L, any>,
+		rule4: ParserRule<L, any>,
+		rule5: ParserRule<L, any>,
+		rule6: ParserRule<L, any>,
+		rule7: ParserRule<L, any>,
+		rule8: ParserRule<L, any>,
+		rule9: ParserRule<L, any>,
+		rule10: ParserRule<L, any>,
+		rule11: ParserRule<L, any>,
+		rule12: ParserRule<L, any>,
+		rule13: ParserRule<L, any>,
+		rule14: ParserRule<L, any>,
+		rule15: ParserRule<L, any>,
+		rule16: ParserRule<L, any>,
+		rule17: ParserRule<L, any>,
+		rule18: ParserRule<L, any>,
+		rule19: ParserRule<L, any>,
+		rule20: ParserRule<L, O>
+	): ParserRule<L, O>;
+
+	last(...rules: readonly ParserRule<L, any>[]): ParserRule<L, any> {
+		const concat = concatInternal(rules);
 		return new ParserRule(
-			`first(${rule.name})`,
+			concat.name.replace("concat", "last"),
 			(
 				input: readonly Token<L>[],
 				start: number,
 				stack: readonly string[]
-			): ParseResult<O> | undefined => {
-				const result = rule.parse(input, start, stack);
+			): ParseResult<any> | undefined => {
+				const result = concat.parse(input, start, stack);
 				if (!result) return undefined;
 				const { value, end } = result;
-				return { value: value[value.length - 1] as O, end };
+				return { value: value[value.length - 1], end };
 			}
 		);
 	}
