@@ -472,6 +472,8 @@ export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 		rule20: ParserRule<L, O20>
 	): ParserRule<L, readonly [O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13, O14, O15, O16, O17, O18, O19, O20]>;
 
+	concat<O>(...rules: readonly ParserRule<L, O>[]): ParserRule<L, readonly O[]>;
+
 	concat(
 		...rules: readonly ParserRule<L, any>[]
 	): ParserRule<L, readonly any[]> {
@@ -783,6 +785,8 @@ export class ParserUtils<L extends LexerFields, T extends ParserTypes> {
 		rule19: ParserRule<L, any>,
 		rule20: ParserRule<L, O>
 	): ParserRule<L, O>;
+
+	last<O>(...rules: readonly ParserRule<L, O>[]): ParserRule<L, O>;
 
 	last(...rules: readonly ParserRule<L, any>[]): ParserRule<L, any> {
 		const concat = concatInternal(rules);
